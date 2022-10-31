@@ -1,0 +1,234 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    cert-manager.io/inject-ca-from: {{.Release.Namespace}}/scone-serving-cert
+    controller-gen.kubebuilder.io/version: v0.9.0
+  name: cas.services.scone.cloud
+spec:
+  conversion:
+    strategy: Webhook
+    webhook:
+      clientConfig:
+        service:
+          name: scone-webhook-service
+          namespace: {{.Release.Namespace}}
+          path: /convert
+      conversionReviewVersions:
+      - v1
+  group: services.scone.cloud
+  names:
+    kind: CAS
+    listKind: CASList
+    plural: cas
+    singular: cas
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: The state of this CAS service
+      jsonPath: .status.state
+      name: Status
+      type: string
+    - jsonPath: .status.version
+      name: VERSION
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: AGE
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: CAS is the Schema for the cas API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: CASSpec defines the desired state of CAS
+            properties:
+              autoUpdate:
+                description: If set to `true`, the controller will check the registry periodically for image digest changes and trigger rolling updates of the CR pods. This assumes that the image has something like semantic versioning in place.
+                type: boolean
+              image:
+                description: Image for CAS containers. This reflects directly on the underlying StatefulSet.
+                type: string
+              imagePullPolicy:
+                description: ImagePullPolicy for CAS containers. This reflects directly on the underlying StatefulSet.
+                type: string
+              imagePullSecrets:
+                description: ImagePullSecrets for CAS containers. This reflects directly on the underlying StatefulSet.
+                items:
+                  description: LocalObjectReference contains enough information to let you locate the referenced object inside the same namespace.
+                  properties:
+                    name:
+                      description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                      type: string
+                  type: object
+                type: array
+              nodeSelector:
+                additionalProperties:
+                  type: string
+                description: 'NodeSelector is a selector which must be true for the pod to fit on a node. Selector which must match a node''s labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/'
+                type: object
+              persistence:
+                description: Configure how CAS database is persisted. If not specified, CAS will not have its database persisted.
+                properties:
+                  accessModes:
+                    items:
+                      type: string
+                    type: array
+                  enabled:
+                    type: boolean
+                  mountPath:
+                    type: string
+                  size:
+                    anyOf:
+                    - type: integer
+                    - type: string
+                    pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                    x-kubernetes-int-or-string: true
+                  storageClass:
+                    type: string
+                type: object
+              resources:
+                description: Resources allows specifying requests for and limits on the resource usage of CAS
+                properties:
+                  limits:
+                    additionalProperties:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                      x-kubernetes-int-or-string: true
+                    description: 'Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                    type: object
+                  requests:
+                    additionalProperties:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                      x-kubernetes-int-or-string: true
+                    description: 'Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                    type: object
+                type: object
+              service:
+                description: Configure how CAS is exposed via a Kubernetes Service. If not specified, CAS will be exposed as a ClusterIP service (internal to the cluster). LoadBalancer and NodePort are also supported.
+                properties:
+                  annotations:
+                    additionalProperties:
+                      type: string
+                    description: 'Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects. More info: http://kubernetes.io/docs/user-guide/annotations'
+                    type: object
+                  clientPort:
+                    description: ClientPort defines the port that exposes the CAS Client API (8081).
+                    format: int32
+                    type: integer
+                  enclavePort:
+                    description: EnclavePort defines the port that exposes the CAS Enclave API (18765).
+                    format: int32
+                    type: integer
+                  loadBalancerIP:
+                    description: 'Only applies to Service Type: LoadBalancer. This feature depends on whether the underlying cloud-provider supports specifying the loadBalancerIP when a load balancer is created. This field will be ignored if the cloud-provider does not support the feature. Deprecated: This field was under-specified and its meaning varies across implementations, and it cannot support dual-stack. As of Kubernetes v1.24, users are encouraged to use implementation-specific annotations when available. This field may be removed in a future API version.'
+                    type: string
+                  nodePorts:
+                    description: 'Only applies to Service Type: NodePort. NodePortSpec allows the user to override the node ports used to expose the CAS APIs: use "NodePortSpec.ClientPort" to set the node port that exposes the Client API (8081), and "NodePortSepc.Enclave:Port" to set the node port that exposes the Enclave API (18765). Please note that the ports MUST BE available on ALL cluster nodes, otherwise the service will not be deployed. This feature is recommended only when it''s absolutely necessary to know in advance which ports will be used. Otherwise we recommend not setting them, and letting Kubernetes choose random ports.'
+                    properties:
+                      clientPort:
+                        description: ClientPort defines the node port that exposes the CAS Client API (8081).
+                        format: int32
+                        type: integer
+                      enclavePort:
+                        description: EnclavePort defines the node port that exposes the CAS Enclave API (18765).
+                        format: int32
+                        type: integer
+                    type: object
+                  type:
+                    description: 'type determines how the Service is exposed. Defaults to ClusterIP. Valid options are ClusterIP, NodePort, and LoadBalancer. "ClusterIP" allocates a cluster-internal IP address for load-balancing to endpoints. Endpoints are determined by the selector or if that is not specified, by manual construction of an Endpoints object or EndpointSlice objects. If clusterIP is "None", no virtual IP is allocated and the endpoints are published as a set of endpoints rather than a virtual IP. "NodePort" builds on ClusterIP and allocates a port on every node which routes to the same endpoints as the clusterIP. "LoadBalancer" builds on NodePort and creates an external load-balancer (if supported in the current cloud) which routes to the same endpoints as the clusterIP. More info: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types'
+                    type: string
+                type: object
+            required:
+            - image
+            type: object
+          status:
+            description: CASStatus defines the observed state of CAS
+            properties:
+              conditions:
+                description: conditions describing the state of CAS
+                items:
+                  description: "Condition contains details for one aspect of the current state of this API Resource. --- This struct is intended for direct use as an array at the field path .status.conditions.  For example, \n type FooStatus struct{ // Represents the observations of a foo's current state. // Known .status.conditions.type are: \"Available\", \"Progressing\", and \"Degraded\" // +patchMergeKey=type // +patchStrategy=merge // +listType=map // +listMapKey=type Conditions []metav1.Condition `json:\"conditions,omitempty\" patchStrategy:\"merge\" patchMergeKey:\"type\" protobuf:\"bytes,1,rep,name=conditions\"` \n // other fields }"
+                  properties:
+                    lastTransitionTime:
+                      description: lastTransitionTime is the last time the condition transitioned from one status to another. This should be when the underlying condition changed.  If that is not known, then using the time when the API field changed is acceptable.
+                      format: date-time
+                      type: string
+                    message:
+                      description: message is a human readable message indicating details about the transition. This may be an empty string.
+                      maxLength: 32768
+                      type: string
+                    observedGeneration:
+                      description: observedGeneration represents the .metadata.generation that the condition was set based upon. For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date with respect to the current state of the instance.
+                      format: int64
+                      minimum: 0
+                      type: integer
+                    reason:
+                      description: reason contains a programmatic identifier indicating the reason for the condition's last transition. Producers of specific condition types may define expected values and meanings for this field, and whether the values are considered a guaranteed API. The value should be a CamelCase string. This field may not be empty.
+                      maxLength: 1024
+                      minLength: 1
+                      pattern: ^[A-Za-z]([A-Za-z0-9_,:]*[A-Za-z0-9_])?$
+                      type: string
+                    status:
+                      description: status of the condition, one of True, False, Unknown.
+                      enum:
+                      - "True"
+                      - "False"
+                      - Unknown
+                      type: string
+                    type:
+                      description: type of condition in CamelCase or in foo.example.com/CamelCase. --- Many .condition.type values are consistent across resources like Available, but because arbitrary conditions can be useful (see .node.status.conditions), the ability to deconflict is important. The regex it matches is (dns1123SubdomainFmt/)?(qualifiedNameFmt)
+                      maxLength: 316
+                      pattern: ^([a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*/)?(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])$
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - message
+                  - reason
+                  - status
+                  - type
+                  type: object
+                type: array
+              provisioned:
+                description: Whether this CAS instance has been provisioned or not.
+                type: boolean
+              readyReplicas:
+                description: the number of replicas that are available
+                minimum: -1
+                type: integer
+              replicaAlert:
+                description: the number of the desired replicas not running
+                minimum: -1
+                type: integer
+              state:
+                description: The state of CAS
+                enum:
+                - HEALTHY
+                - PENDING
+                - UNHEALTHY
+                type: string
+              version:
+                description: 'The CAS version. Note: this is only available for 5.8.0 and later.'
+                type: string
+            required:
+            - state
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

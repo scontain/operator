@@ -1,0 +1,12 @@
+# Cert-manager is a requirement for the webhooks of the SCONE operator.
+# Cert-manager can be enabled by adding the flag --set cert-manager.enabled=true
+# to the `helm install` command of the SCONE operator.
+# Cert-manager's namespace can be changed by adding the flag
+# --set cert-manager.namespace=desirednamespace
+# to the `helm install` command of the SCONE operator.
+# Care should be taken not to have more than one instance of cert-manager
+# running in the same cluster, since it also manages non-namespaced resources.
+cert-manager:
+  namespace: cert-manager
+  enabled: false
+  installCRDs: true
