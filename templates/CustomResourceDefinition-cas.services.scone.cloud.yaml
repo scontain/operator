@@ -189,6 +189,14 @@ spec:
                   storageClass:
                     type: string
                 type: object
+              podAnnotations:
+                additionalProperties:
+                  type: string
+                description: 'Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects. More info about annotations in general: http://kubernetes.io/docs/user-guide/annotations. PodAnnotations will be added to the metadata.annotations of the CAS pod.'
+                type: object
+              reinstallOnFatal:
+                description: 'If set to true the scone operator will try to recover from what it believes to be fatal errors by reistalling the service. Resinstalling the service causes a disruption in the availability of the service. Default: False'
+                type: boolean
               resources:
                 description: Resources allows specifying requests for and limits on the resource usage of CAS
                 properties:

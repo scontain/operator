@@ -1,5 +1,5 @@
 apiVersion: v2
-appVersion: 0.0.4
+appVersion: 0.0.5
 dependencies:
 - alias: cert-manager
   condition: cert-manager.enabled
@@ -8,4 +8,4 @@ dependencies:
   version: v1.9.1
 description: An operator for the SCONE kubernetes cluster services
 name: scone-operator
-version: 0.0.4
+version: 0.0.5
