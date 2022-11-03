@@ -52,6 +52,7 @@ rules:
   - get
   - list
   - patch
+  - watch
 - apiGroups:
   - ""
   resources:
@@ -63,8 +64,22 @@ rules:
 - apiGroups:
   - ""
   resources:
+  - persistentvolumeclaims
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
   - pods
   verbs:
+  - create
+  - delete
   - get
   - list
   - watch
@@ -73,7 +88,10 @@ rules:
   resources:
   - pods/log
   verbs:
+  - create
+  - delete
   - get
+  - list
 - apiGroups:
   - ""
   resources:
@@ -101,6 +119,7 @@ rules:
   - delete
   - get
   - list
+  - update
 - apiGroups:
   - ""
   resources:
@@ -139,6 +158,18 @@ rules:
   - get
   - patch
   - update
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
 - apiGroups:
   - apps
   resources:
@@ -264,6 +295,7 @@ rules:
   - delete
   - get
   - list
+  - update
 - apiGroups:
   - rbac.authorization.k8s.io
   resources:
@@ -273,6 +305,7 @@ rules:
   - delete
   - get
   - list
+  - update
 - apiGroups:
   - services.scone.cloud
   resources:
