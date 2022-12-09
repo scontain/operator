@@ -133,6 +133,18 @@ rules:
   - update
   - watch
 - apiGroups:
+  - admissionregistration.k8s.io
+  resources:
+  - mutatingwebhookconfigurations
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
   - apps
   resources:
   - daemonsets
@@ -170,6 +182,30 @@ rules:
   - patch
   - update
   - watch
+- apiGroups:
+  - apps
+  resourceNames:
+  - vault-sample-agent-injector
+  resources:
+  - deployments
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - deployments/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - apps
+  resources:
+  - deployments/status
+  verbs:
+  - get
+  - patch
+  - update
 - apiGroups:
   - apps
   resources:
@@ -328,6 +364,32 @@ rules:
   - services.scone.cloud
   resources:
   - cas/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - services.scone.cloud
+  resources:
+  - vaults
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - services.scone.cloud
+  resources:
+  - vaults/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - services.scone.cloud
+  resources:
+  - vaults/status
   verbs:
   - get
   - patch

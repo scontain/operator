@@ -66,3 +66,23 @@ webhooks:
     resources:
     - cas
   sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: scone-webhook-service
+      namespace: {{.Release.Namespace}}
+      path: /mutate-services-scone-cloud-v1beta1-vault
+  failurePolicy: Fail
+  name: mvault.kb.io
+  rules:
+  - apiGroups:
+    - services.scone.cloud
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - vaults
+  sideEffects: None
