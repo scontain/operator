@@ -6,6 +6,8 @@
 # to the `helm install` command of the SCONE operator.
 # Care should be taken not to have more than one instance of cert-manager
 # running in the same cluster, since it also manages non-namespaced resources.
+image: "registry.scontain.com/scone.cloud/k8soperators:0.0.7"
+
 cert-manager:
   namespace: cert-manager
   enabled: false

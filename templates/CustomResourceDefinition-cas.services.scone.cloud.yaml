@@ -204,6 +204,20 @@ spec:
                       type: string
                   type: object
                 type: array
+              livenessProbe:
+                properties:
+                  attestedCLI:
+                    description: if `attestedCLI` is `true`, the liveness probe (which is a SCONE CLI operation) will run attested. useful to ensure that both CAS APIs (client and enclave) are healthy.
+                    type: boolean
+                  enabled:
+                    type: boolean
+                  failureThreshold:
+                    type: integer
+                  periodSeconds:
+                    type: integer
+                required:
+                - enabled
+                type: object
               nodeSelector:
                 additionalProperties:
                   type: string
