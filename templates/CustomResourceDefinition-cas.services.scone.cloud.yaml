@@ -52,6 +52,9 @@ spec:
           spec:
             description: CASSpec defines the desired state of CAS
             properties:
+              attestedCLIProbes:
+                description: If `attestedCLIProbes` is `true`, the liveness and startup probes (which are SCONE CLI operations) will run attested (if they are enabled - otherwise this option has no effect).
+                type: boolean
               autoUpdate:
                 description: If set to `true`, the controller will check the registry periodically for image digest changes and trigger rolling updates of the CR pods. This assumes that the image has something like semantic versioning in place.
                 type: boolean
@@ -206,14 +209,15 @@ spec:
                 type: array
               livenessProbe:
                 properties:
-                  attestedCLI:
-                    description: if `attestedCLI` is `true`, the liveness probe (which is a SCONE CLI operation) will run attested. useful to ensure that both CAS APIs (client and enclave) are healthy.
-                    type: boolean
                   enabled:
                     type: boolean
                   failureThreshold:
                     type: integer
+                  initialDelaySeconds:
+                    type: integer
                   periodSeconds:
+                    type: integer
+                  timeoutSeconds:
                     type: integer
                 required:
                 - enabled
@@ -307,6 +311,21 @@ spec:
                   type:
                     description: 'type determines how the Service is exposed. Defaults to ClusterIP. Valid options are ClusterIP, NodePort, and LoadBalancer. "ClusterIP" allocates a cluster-internal IP address for load-balancing to endpoints. Endpoints are determined by the selector or if that is not specified, by manual construction of an Endpoints object or EndpointSlice objects. If clusterIP is "None", no virtual IP is allocated and the endpoints are published as a set of endpoints rather than a virtual IP. "NodePort" builds on ClusterIP and allocates a port on every node which routes to the same endpoints as the clusterIP. "LoadBalancer" builds on NodePort and creates an external load-balancer (if supported in the current cloud) which routes to the same endpoints as the clusterIP. More info: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types'
                     type: string
+                type: object
+              startupProbe:
+                properties:
+                  enabled:
+                    type: boolean
+                  failureThreshold:
+                    type: integer
+                  initialDelaySeconds:
+                    type: integer
+                  periodSeconds:
+                    type: integer
+                  timeoutSeconds:
+                    type: integer
+                required:
+                - enabled
                 type: object
             required:
             - image
